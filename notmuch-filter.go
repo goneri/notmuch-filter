@@ -180,7 +180,7 @@ func main() {
 		log.Fatalf("Failed to open the database: %v\n", status)
 	}
 
-	query = nmdb.CreateQuery("tag:inbox")
+	query = nmdb.CreateQuery("tag:new")
 	if query.CountMessages() == 0 {
 		fmt.Printf("Nothing to do\n")
 		os.Exit(0)
