@@ -1,0 +1,17 @@
+{"Field": "subject", "Pattern": "\\[Fusioninventory-user\\]", "Tags": "+list +fusinv +fusinv-user" }
+{"Field": "subject", "Pattern": "\\[Fusioninventory-user\\]", "Tags": "+list +fusinv +fusinv-user" }
+{"Field": "subject", "Pattern": "\\[libvirt\\]", "Tags": "+list +libvirt" }
+"Field": "From", "Pattern": "goneri@rulezlan.org", "Tags": "+sent +archive" }
+{"Field": "From", "Pattern": "support@mentors.debian.net", "Tags": "+list +debian +debian-mentors" }
+{"Field": "From", "Pattern": "@emailing.canalplus.fr", "Tags": "+delete +spam" }
+{"Field": "suject", "Pattern": "mailing list memberships reminder|Rappel_pour_les_abonnements_aux_listes", "Tags": "+delete" }
+{"Field": "List-ID", "Pattern": "\\.lists\\.debian\\.org>", "Tags": "+list +debian" }
+{"Field": "List-ID", "Pattern": "<debian-announce\\.lists\\.debian\\.org>", "Tags": "+list +debian +debian-announce" }
+{"Field": "List-ID", "Pattern": "<debian-arm\\.lists\\.debian\\.org>", "Tags": "+list +debian +debian-arm" }
+{"Field": "List-ID", "Pattern": "<debian-asso-fr\\.lists\\.debian\\.org>", "Tags": "+list +debian +debian-asso-fr" }
+{"Field": "List-ID", "Pattern": "<debian-private\\.lists\\.debian\\.org>", "Tags": "+list +debian +debian-private" }
+{"Field": "List-ID", "Pattern": "<debian-project\\.lists\\.debian\\.org>", "Tags": "+list +debian +debian-project" }
+{"Field": "X-BeenThere", "Pattern": "obnam@flarn.net", "Tags": "+list +obnam" }
+{"Field": "X-Loop", "Pattern": "owner@bugs.debian.org", "Tags": "+debian +bts-notif +bug" }
+{"Field": "Message-ID", "Pattern": "twitter\\.com", "Tags": "+delete" }
+{"Field": "Message-ID", "Pattern": ".", "Tags": "-new" }
