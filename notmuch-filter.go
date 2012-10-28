@@ -77,9 +77,9 @@ func saveResult(resultOut chan Result, quit chan bool) {
 		msg.Freeze()
 		for _, v := range tagRegexp.FindAllStringSubmatch(result.Tags, -1) {
 			if v[1] == "+" {
-	//			msg.AddTag(v[2])
+				msg.AddTag(v[2])
 			} else if v[1] == "-" {
-	//			msg.RemoveTag(v[2])
+				msg.RemoveTag(v[2])
 			}
 		}
 		msg.Thaw()
