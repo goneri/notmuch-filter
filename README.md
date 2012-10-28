@@ -26,6 +26,11 @@ configuration
 usage
 -----
 
+Edit `$HOME/.notmuch-config` and ensure new files will get the `new` tag:
+
+    [new]
+    tags=new
+
     $ getmail/fetchmail/offlineimap/whatever
     $ notmuch new
     $ notmuch-filter
