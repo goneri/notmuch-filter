@@ -27,17 +27,16 @@ type Result struct {
 	Die       bool
 }
 
-
 const NCPU = 4 // number of CPU cores 
 
-func getMaildirLoc() (string) {
-    // honor NOTMUCH_CONFIG
-    home := os.Getenv("NOTMUCH_CONFIG")
-    if home == "" {
-        home = os.Getenv("HOME")
-    }
+func getMaildirLoc() string {
+	// honor NOTMUCH_CONFIG
+	home := os.Getenv("NOTMUCH_CONFIG")
+	if home == "" {
+		home = os.Getenv("HOME")
+	}
 
-    return path.Join(home, "Maildir")
+	return path.Join(home, "Maildir")
 }
 
 func saveResult(resultOut chan Result, quit chan bool) {
@@ -62,7 +61,7 @@ func saveResult(resultOut chan Result, quit chan bool) {
 		if result.Die {
 			nmdb.Close()
 			quit <- true
-                        fmt.Print("")
+			fmt.Print("")
 			return
 		}
 
@@ -125,7 +124,7 @@ func studyMsg(filter []Filter, filenameIn chan string, resultOut chan Result, qu
 
 func loadFilter() (filter []Filter) {
 
-	file, err := os.Open(fmt.Sprintf("/%s/notmuch-filter.json",getMaildirLoc())) // For read access.
+	file, err := os.Open(fmt.Sprintf("/%s/notmuch-filter.json", getMaildirLoc())) // For read access.
 	if err != nil {
 		log.Fatal(err)
 	}
