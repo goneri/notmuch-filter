@@ -23,6 +23,13 @@ configuration
     {"Field": "X-BeenThere", "Pattern": "obnam@flarn.net", "Tags": "+list +obnam -inbox" }
 ```
 
+usage
+-----
+
+    $ getmail/fetchmail/offlineimap/whatever
+    $ notmuch new
+    $ notmuch-filter
+
 license
 -------
 
