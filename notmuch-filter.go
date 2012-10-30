@@ -39,51 +39,77 @@ func getMaildirLoc() string {
 	return path.Join(home, "Maildir")
 }
 
-func saveResult(resultOut chan Result, quit chan bool) {
+func RefreshFlags(nmdb *notmuch.Database) {
 
-	//	var query *notmuch.Query
-	var nmdb *notmuch.Database
-	var msgIDRegexp = regexp.MustCompile("^<(.*)>$")
-	var tagRegexp = regexp.MustCompile("([\\+-])(\\S+)")
-
-	// open the database
-	if db, status := notmuch.OpenDatabase(getMaildirLoc(),
-		1); status == notmuch.STATUS_SUCCESS {
-		nmdb = db
-	} else {
-		log.Fatalf("Failed to open the database: %v\n", status)
+	query := nmdb.CreateQuery("tag:inbox and tag:delete")
+	msgs := query.SearchMessages()
+	for ; msgs.Valid(); msgs.MoveToNext() {
+		msg := msgs.Get()
+		msg.RemoveTag("inbox")
 	}
-	defer nmdb.Close()
 
-	for {
-		result := <-resultOut
+	query = nmdb.CreateQuery("tag:inbox and tag:archive")
+	msgs = query.SearchMessages()
+	for ; msgs.Valid(); msgs.MoveToNext() {
+		msg := msgs.Get()
+		msg.RemoveTag("inbox")
+	}
 
-		if result.Die {
-			nmdb.Close()
-			quit <- true
-			fmt.Print("")
-			return
-		}
+	query = nmdb.CreateQuery("tag:inbox and tag:seen and not tag:list")
+	msgs = query.SearchMessages()
+	for ; msgs.Valid(); msgs.MoveToNext() {
+		msg := msgs.Get()
+		msg.AddTag("archive")
+		msg.RemoveTag("inbox")
+	}
 
-		// Message-ID without the <>
-		msgID := msgIDRegexp.FindStringSubmatch(result.MessageID)[1]
-		filter := "id:"
-		filter += msgID
+	query = nmdb.CreateQuery("tag:inbox and tag:seen and tag:list")
+	msgs = query.SearchMessages()
+	for ; msgs.Valid(); msgs.MoveToNext() {
+		msg := msgs.Get()
+		msg.RemoveTag("inbox")
+	}
+
+	query = nmdb.CreateQuery("tag:inbox and tag:seen and tag:bug")
+	msgs = query.SearchMessages()
+	for ; msgs.Valid(); msgs.MoveToNext() {
+		msg := msgs.Get()
+		msg.RemoveTag("inbox")
+	}
+
+	query = nmdb.CreateQuery("tag:killed")
+	msgs = query.SearchMessages()
+	for ; msgs.Valid(); msgs.MoveToNext() {
+		msg := msgs.Get()
+		threadId := msg.GetThreadId()
+		filter := fmt.Sprintf("thread:%s", threadId)
+
 		query := nmdb.CreateQuery(filter)
 		msgs := query.SearchMessages()
-		msg := msgs.Get()
-
-		msg.Freeze()
-		for _, v := range tagRegexp.FindAllStringSubmatch(result.Tags, -1) {
-			if v[1] == "+" {
-				msg.AddTag(v[2])
-			} else if v[1] == "-" {
-				msg.RemoveTag(v[2])
-			}
+		for ; msgs.Valid(); msgs.MoveToNext() {
+			msg := msgs.Get()
+			msg.RemoveTag("inbox")
 		}
-		msg.Thaw()
-
 	}
+
+	query = nmdb.CreateQuery("tag:inbox")
+	msgs = query.SearchMessages()
+	for ; msgs.Valid(); msgs.MoveToNext() {
+		msg := msgs.Get()
+		threadId := msg.GetThreadId()
+		filter := fmt.Sprintf("thread:%s", threadId)
+
+		query := nmdb.CreateQuery(filter)
+		msgs := query.SearchMessages()
+		for ; msgs.Valid(); msgs.MoveToNext() {
+			msg := msgs.Get()
+			msg.AddTag("inbox")
+		}
+	}
+
+	nmdb.Close()
+	fmt.Print("Ok\n")
+
 }
 
 func studyMsg(filter []Filter, filenameIn chan string, resultOut chan Result, quit chan bool) {
@@ -91,7 +117,10 @@ func studyMsg(filter []Filter, filenameIn chan string, resultOut chan Result, qu
 		filename := <-filenameIn
 
 		if filename == "" {
-			quit <- true
+			var result Result
+			result.Die = true
+			resultOut <- result
+
 			return
 		}
 		// We can use Notmuch for this directly because Xappian will
@@ -166,6 +195,7 @@ func studyMsgs(resultOut chan Result, quit chan bool, filenames []string) {
 		filenameIn <- ""
 	}
 
+	quit <- true
 }
 
 func main() {
@@ -179,38 +209,73 @@ func main() {
 		log.Fatalf("Failed to open the database: %v\n", status)
 	}
 
+	quit := make(chan bool)
+	resultOut := make(chan Result)
+
 	query = nmdb.CreateQuery("tag:new")
-	if query.CountMessages() == 0 {
-		fmt.Printf("Nothing to do\n")
-		os.Exit(0)
-	}
 
 	println(">", query.CountMessages(), "<")
 	msgs := query.SearchMessages()
 
 	var filenames []string
-	for ; msgs.Valid(); msgs.MoveToNext() {
+	if query.CountMessages() > 0 {
+		for ; msgs.Valid(); msgs.MoveToNext() {
+			msg := msgs.Get()
+
+			filenames = append(filenames, msg.GetFileName())
+		}
+	}
+
+	go studyMsgs(resultOut, quit, filenames)
+
+	//	var query *notmuch.Query
+	var msgIDRegexp = regexp.MustCompile("^<(.*)>$")
+	var tagRegexp = regexp.MustCompile("([\\+-])(\\S+)")
+
+	// open the database
+	if db, status := notmuch.OpenDatabase(getMaildirLoc(),
+		1); status == notmuch.STATUS_SUCCESS {
+		nmdb = db
+	} else {
+		log.Fatalf("Failed to open the database: %v\n", status)
+	}
+	defer nmdb.Close()
+
+	var running int = NCPU + 1
+	for {
+		result := <-resultOut
+
+		if result.Die {
+
+			running--
+
+			if running > 0 {
+				continue
+			} else {
+				RefreshFlags(nmdb)
+				os.Exit(0)
+			}
+		}
+
+		// Message-ID without the <>
+		msgID := msgIDRegexp.FindStringSubmatch(result.MessageID)[1]
+		filter := "id:"
+		filter += msgID
+		query := nmdb.CreateQuery(filter)
+		msgs := query.SearchMessages()
 		msg := msgs.Get()
-		filenames = append(filenames, msg.GetFileName())
+
+		fmt.Printf("%s, tags: %\n", msgID, result.Tags)
+		msg.Freeze()
+		for _, v := range tagRegexp.FindAllStringSubmatch(result.Tags, -1) {
+			if v[1] == "+" {
+				msg.AddTag(v[2])
+			} else if v[1] == "-" {
+				msg.RemoveTag(v[2])
+			}
+		}
+		msg.Thaw()
+
 	}
-	query.Destroy()
-	nmdb.Close()
-
-	quit := make(chan bool)
-	resultOut := make(chan Result)
-	go saveResult(resultOut, quit)
-
-	studyMsgs(resultOut, quit, filenames)
-
-	var lastResult Result
-	lastResult.Die = true
-
-	resultOut <- lastResult
-
-	for i := 0; i < NCPU+2; i++ {
-		<-quit
-	}
-
-	fmt.Printf("done\n")
 
 }

@@ -3,6 +3,15 @@ description
 
 A tool to tag mail. Configuration is loaded from a JSON file.
 
+notmuch-filter will load a collection of filter from notmuch-filter.json and
+apply tag depending on the result.
+
+It will also (much like GMail):
+
+* drop `tag:inbox` tag from thread with `tag:killed` message.
+* remove `tag:inbox` from messages with `tag:seen`
+* add `tag:inbox` to complet the thread if a new message show up
+
 installation
 ------------
 
