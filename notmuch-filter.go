@@ -139,6 +139,10 @@ func studyMsg(filter []Filter, filenameIn chan string, resultOut chan Result, qu
 
 		var result Result
 		result.MessageID = msg.Header.Get("Message-Id")
+                if (result.MessageID == "") {
+                    fmt.Printf("No message ID for %s\n", filename)
+                    continue;
+                }
 		result.Filename = filename
 		for _, f := range filter {
 			if f.Re.MatchString(msg.Header.Get(f.Field)) {
