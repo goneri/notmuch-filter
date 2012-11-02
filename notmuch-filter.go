@@ -25,9 +25,10 @@ type Result struct {
 	MessageID string
 	Tags      string
 	Die       bool
+        Filename  string
 }
 
-const NCPU = 4 // number of CPU cores 
+const NCPU = 4 // number of CPU cores
 
 func getMaildirLoc() string {
 	// honor NOTMUCH_CONFIG
@@ -138,6 +139,7 @@ func studyMsg(filter []Filter, filenameIn chan string, resultOut chan Result, qu
 
 		var result Result
 		result.MessageID = msg.Header.Get("Message-Id")
+		result.Filename = filename
 		for _, f := range filter {
 			if f.Re.MatchString(msg.Header.Get(f.Field)) {
 				result.Tags += " "
@@ -264,8 +266,12 @@ func main() {
 		query := nmdb.CreateQuery(filter)
 		msgs := query.SearchMessages()
 		msg := msgs.Get()
+		if msg == nil {
+                    fmt.Printf("Can't find MessageID %s for mail %s\n", msgID, result.Filename)
+                    return;
+                }
 
-		fmt.Printf("%s, tags: %\n", msgID, result.Tags)
+		fmt.Printf("%s, tags: %s\n", msgID, result.Tags)
 		msg.Freeze()
 		for _, v := range tagRegexp.FindAllStringSubmatch(result.Tags, -1) {
 			if v[1] == "+" {
