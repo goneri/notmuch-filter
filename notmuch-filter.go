@@ -272,7 +272,7 @@ func main() {
 		msg := msgs.Get()
 		if msg == nil {
                     fmt.Printf("Can't find MessageID %s for mail %s\n", msgID, result.Filename)
-                    return;
+                    continue
                 }
 
 		fmt.Printf("%s, tags: %s\n", msgID, result.Tags)
