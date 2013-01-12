@@ -78,7 +78,7 @@ func RefreshFlags(nmdb *notmuch.Database) {
 		msg.RemoveTag("inbox")
 	}
 
-	query = nmdb.CreateQuery("tag:killed")
+	query = nmdb.CreateQuery("tag:inbox and tag:killed")
 	msgs = query.SearchMessages()
 	for ; msgs.Valid(); msgs.MoveToNext() {
 		msg := msgs.Get()
