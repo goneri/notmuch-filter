@@ -258,12 +258,12 @@ func main() {
 			if running > 0 {
 				continue
 			} else {
-				RefreshFlags(nmdb)
-				os.Exit(0)
+                            break
 			}
 		}
 
 		// Message-ID without the <>
+                fmt.Printf("MessageID: %s\n", result.MessageID)
 		msgID := msgIDRegexp.FindStringSubmatch(result.MessageID)[1]
 		filter := "id:"
 		filter += msgID
@@ -287,5 +287,9 @@ func main() {
 		msg.Thaw()
 
 	}
+        RefreshFlags(nmdb)
+        fmt.Printf("exit\n")
+        os.Exit(0)
+
 
 }
