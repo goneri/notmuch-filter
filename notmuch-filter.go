@@ -78,21 +78,6 @@ func RefreshFlags(nmdb *notmuch.Database) {
 		msg.RemoveTag("inbox")
 	}
 
-	query = nmdb.CreateQuery("tag:inbox and tag:killed")
-	msgs = query.SearchMessages()
-	for ; msgs.Valid(); msgs.MoveToNext() {
-		msg := msgs.Get()
-		threadId := msg.GetThreadId()
-		filter := fmt.Sprintf("thread:%s", threadId)
-
-		query := nmdb.CreateQuery(filter)
-		msgs := query.SearchMessages()
-		for ; msgs.Valid(); msgs.MoveToNext() {
-			msg := msgs.Get()
-			msg.RemoveTag("inbox")
-		}
-	}
-
 	query = nmdb.CreateQuery("tag:inbox")
 	msgs = query.SearchMessages()
 	for ; msgs.Valid(); msgs.MoveToNext() {
@@ -105,6 +90,21 @@ func RefreshFlags(nmdb *notmuch.Database) {
 		for ; msgs.Valid(); msgs.MoveToNext() {
 			msg := msgs.Get()
 			msg.AddTag("inbox")
+		}
+	}
+
+	query = nmdb.CreateQuery("tag:inbox and tag:killed")
+	msgs = query.SearchMessages()
+	for ; msgs.Valid(); msgs.MoveToNext() {
+		msg := msgs.Get()
+		threadId := msg.GetThreadId()
+		filter := fmt.Sprintf("thread:%s", threadId)
+
+		query := nmdb.CreateQuery(filter)
+		msgs := query.SearchMessages()
+		for ; msgs.Valid(); msgs.MoveToNext() {
+			msg := msgs.Get()
+			msg.RemoveTag("inbox")
 		}
 	}
 
