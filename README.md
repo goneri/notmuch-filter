@@ -52,4 +52,4 @@ BSD, See LICENSE file.
 contact
 -------
 
-* Gonéri Le Bouder <goneri@rulezlan.org>
+* Gonéri Le Bouder <goneri@lebouder.net>
