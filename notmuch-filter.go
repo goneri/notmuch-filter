@@ -264,7 +264,13 @@ func main() {
 
 		// Message-ID without the <>
                 fmt.Printf("MessageID: %s\n", result.MessageID)
-		msgID := msgIDRegexp.FindStringSubmatch(result.MessageID)[1]
+		reResult := msgIDRegexp.FindStringSubmatch(result.MessageID)
+		if (reResult == nil) {
+			fmt.Printf("Can't parse MessageID for mail %s\n", result.Filename)
+			continue
+		}
+
+		msgID := reResult[1]
 		filter := "id:"
 		filter += msgID
 		query := nmdb.CreateQuery(filter)
