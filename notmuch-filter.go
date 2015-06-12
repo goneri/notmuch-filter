@@ -33,6 +33,12 @@ const NCPU = 1 // number of CPU cores
 func getMaildirLoc() string {
 	// honor NOTMUCH_CONFIG
 	home := os.Getenv("NOTMUCH_CONFIG")
+        notmuch_maildir := os.Getenv("NOTMUCH_MAILDIR")
+
+        if notmuch_maildir != "" {
+            return notmuch_maildir
+	}
+
 	if home == "" {
 		home = os.Getenv("HOME")
 	}
