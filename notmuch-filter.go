@@ -252,7 +252,6 @@ func main() {
 	} else {
 		log.Fatalf("Failed to open the database: %v\n", status)
 	}
-	defer nmdb.Close()
 
 	var running int = NCPU + 1
 	for {
@@ -289,7 +288,6 @@ func main() {
                 }
 
 		fmt.Printf("%s, tags: %s\n", msgID, result.Tags)
-		msg.Freeze()
 		for _, v := range tagRegexp.FindAllStringSubmatch(result.Tags, -1) {
 			if v[1] == "+" {
 				msg.AddTag(v[2])
@@ -297,11 +295,10 @@ func main() {
 				msg.RemoveTag(v[2])
 			}
 		}
-		msg.Thaw()
 
 	}
-        RefreshFlags(nmdb)
         fmt.Printf("exit\n")
+	nmdb.Close()
         os.Exit(0)
 
 
