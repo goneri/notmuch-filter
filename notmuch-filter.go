@@ -244,7 +244,8 @@ func main() {
 	var msgIDRegexp = regexp.MustCompile("^<(.*?)>")
 	var tagRegexp = regexp.MustCompile("([\\+-])(\\S+)")
 
-	// open the database
+	nmdb.Close()
+	// Reopen the database
 	if db, status := notmuch.OpenDatabase(getMaildirLoc(),
 		1); status == notmuch.STATUS_SUCCESS {
 		nmdb = db
