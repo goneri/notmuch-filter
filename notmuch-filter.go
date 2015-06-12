@@ -241,7 +241,7 @@ func main() {
 	go studyMsgs(resultOut, quit, filenames)
 
 	//	var query *notmuch.Query
-	var msgIDRegexp = regexp.MustCompile("^<(.*)>$")
+	var msgIDRegexp = regexp.MustCompile("^<(.*?)>")
 	var tagRegexp = regexp.MustCompile("([\\+-])(\\S+)")
 
 	// open the database
