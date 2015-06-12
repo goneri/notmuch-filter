@@ -28,7 +28,7 @@ type Result struct {
         Filename  string
 }
 
-const NCPU = 4 // number of CPU cores
+const NCPU = 1 // number of CPU cores
 
 func getMaildirLoc() string {
 	// honor NOTMUCH_CONFIG
